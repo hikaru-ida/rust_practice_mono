@@ -11,10 +11,10 @@ use crate::{
 };
 
 fn main() {
-    let mut app = App: new();
+    let mut app = App::new();
 
     match app.handle_args() {
-        Ok(mgs) => match msg {
+        Ok(msg) => match msg {
             Message::Empty => (),
             _ => println!("{}", Output::Message(msg)),
         },

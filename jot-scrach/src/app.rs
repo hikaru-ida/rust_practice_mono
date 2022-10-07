@@ -1,5 +1,5 @@
 use crate::{
-    enums::{Item, VaultIterm},
+    enums::{Item, VaultItem},
     output::{error::Error, message::Message},
     state::{
         args::{Args, Command},
@@ -34,7 +34,7 @@ impl App {
             } => {
                 if let (Some(name), Some(location)) = (name, location) {
                     self.vaults.create_vault(name, location)?;
-                    return Ok(Message::ItermCreated(Item::Vl, name.to_owned()));
+                    return Ok(Message::ItemCreated(Item::Vl, name.to_owned()));
                 } else {
                     self.vaults.list_vaults(show_loc);
                     return Ok(Message::Empty);
@@ -53,14 +53,14 @@ impl App {
             }
             Command::Open { name } => {
                 self.vaults
-                    .ref_cuurent()?
+                    .ref_current()?
                     .open_note(name, self.config.get_editor_data())?;
                 return Ok(Message::Empty);
             }
             Command::Folder { name } => {
                 self.vaults
                     .ref_current()?
-                    .create_vault_item(VaultIterm::Fd, name)?;
+                    .create_vault_item(VaultItem::Fd, name)?;
                 return Ok(Message::ItemCreated(Item::Fd, name.to_owned()));
             }
             Command::Chdir { path } => {
@@ -90,7 +90,11 @@ impl App {
                         new_name,
                     )?,
                 };
-                return Ok(Message::ItemRenamed(item_type.to_owned()));
+                return Ok(Message::ItemRenamed(
+                    item_type.to_owned(),
+                    name.to_owned(),
+                    new_name.to_owned(),
+                ));
             }
             Command::Move {
                 item_type,
@@ -98,7 +102,7 @@ impl App {
                 new_location,
             } => {
                 match item_type {
-                    Item::Vl | Item::Vault => self.vaults.move_vault(Name, new_location)?,
+                    Item::Vl | Item::Vault => self.vaults.move_vault(name, new_location)?,
                     _ => self.vaults.ref_current()?.move_vault_item(
                         item_type.to_vault_item(),
                         name,
@@ -113,7 +117,7 @@ impl App {
                 vault_name,
             } => {
                 self.vaults.move_to_vault(item_type, name, vault_name)?;
-                return Ok(Message::ItemVMove(
+                return Ok(Message::ItemVMoved(
                     item_type.to_owned(),
                     name.to_owned(),
                     vault_name.to_owned(),
